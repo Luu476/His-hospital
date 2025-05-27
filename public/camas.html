@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css">
+  <title>Gestión de Camas</title>
+  <style>
+    .contenedor{
+      display: flex;
+      flex-wrap: wrap;
+      width: 80%;
+    }
+    .camas{
+      display:flex;
+      flex-wrap:wrap;
+      min-height:100vh;
+    }
+    .menu{
+      width:20%;
+      background:#003366;
+      padding:20px;
+      box-sizing:border-box;
+    }
+    .alas{
+      width:33.33%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .menu button{
+      width:100%;
+      margin:10px 0;
+      padding:10px;
+      border:none;
+      border-radius:10px;
+      font-weight:bold;
+      color:#fff;
+      background:#1a6ebc;
+      cursor:pointer;
+      transition:.3s;
+    }
+    .menu button:hover{
+      background:#1652a0;
+    }
+    .alas h1{
+      background:#003366;
+      color:#fff;
+      text-align:center;
+      border-radius:8px;
+      padding:10px;
+      margin-bottom:20px;
+      font-size:22px;
+      box-shadow:0 2px 5px rgba(0,0,0,.1);
+    }
+
+    .habitaciones{
+      background:#fff;
+      border-radius:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,.08);
+      padding:15px;
+      margin-bottom:20px;
+    }
+    .habitaciones h2{
+      text-align:center;
+      margin-bottom:15px;
+      color:#1c2e44;
+      font-size:18px;
+      border-bottom:1px solid #dfe6ee;
+      padding-bottom:5px;
+    }
+    .cam-container{
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+    .cam{
+      width:80px;
+      background:#ecf0f1;
+      border-radius:10px;
+      text-align:center;
+      padding:10px;
+      box-shadow:0 1px 4px rgba(0,0,0,.1);
+      transition:.3s transform, .3s background;
+    }
+    .cam:hover{
+      transform:scale(1.07);
+      background:#d0e6e2;
+    }
+    .cam h2{
+      margin:0;
+      font-size:16px;
+      color:#34495e;
+    }
+    .cam img{
+      width:100%;
+      margin-top:5px;
+    }
+
+    .emergencias{
+      width:100%;
+      padding:30px 20px 50px;
+    }
+    .emergencias h1{
+      background:#c0392b;
+      color:#fff;
+      text-align:center;
+      padding:15px;
+      border-radius:15px;
+      box-shadow:0 4px 10px rgba(0,0,0,.2);
+      font-size:26px;
+      letter-spacing:2px;
+      margin-bottom:30px;
+    }
+    .emergencias .cam{
+      width:100px;
+      background:#f9d6d5;
+    }
+
+    @media(max-width:768px){
+      .camas{flex-direction:column;}
+      .menu,.alas{width:100%;}
+      .menu{order:-1;}
+    }
+    .cam.libre { 
+      background: #d5f5e3; 
+    }
+    .cam.ocupada { 
+      background: #f5b7b1; 
+    }
+    .cam.higienizando { 
+      background: #fcf3cf; 
+    }
+    .cama.seleccionada {
+      border: 2px solid blue;
+      transform: scale(1.1);
+    }
+    .asignar-paciente{
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <img src="img/logo.png" alt="Logo del Hospital" />
+    <h1>Gestión de Camas</h1>
+  </header>
+
+
+  <div class="camas">
+    <div class="menu">
+      <button name="todos">Todas las camas</button>
+      <button name="libres">Camas Libres</button>
+      <button name="ocupadas">Camas Ocupadas</button>
+      <button name="higienizando">Camas Higienizando</button> <br><br>
+      <div class="asignar-paciente">
+    <select id="selectPaciente">
+        <option value="">Seleccione un paciente</option>
+      
+    </select>
+    <button id="btnAsignarPaciente">Asignar</button>
+</div>
+    </div>
+    <div class="contenedor">
+      <div class="alas">
+        <h1>Ala 1</h1>
+        <div class="habitaciones">
+          <h2>Habitación A</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>1</h2><img src="img/cama.png" alt="Cama 1"></div>
+            <div class="cam"><h2>2</h2><img src="img/cama.png" alt="Cama 2"></div>
+          </div>
+        </div>
+        <div class="habitaciones">
+          <h2>Habitación B</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>3</h2><img src="img/cama.png" alt="Cama 3"></div>
+            <div class="cam"><h2>4</h2><img src="img/cama.png" alt="Cama 4"></div>
+          </div>
+        </div>
+        <div class="habitaciones">
+          <h2>Habitación C</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>5</h2><img src="img/cama.png" alt="Cama 5"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="alas">
+        <h1>Ala 2</h1>
+        <div class="habitaciones">
+          <h2>Habitación A</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>1</h2><img src="img/cama.png" alt="Cama 1"></div>
+          </div>
+        </div>
+        <div class="habitaciones">
+          <h2>Habitación B</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>2</h2><img src="img/cama.png" alt="Cama 2"></div>
+            <div class="cam"><h2>3</h2><img src="img/cama.png" alt="Cama 3"></div>
+          </div>
+        </div>
+        <div class="habitaciones">
+          <h2>Habitación C</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>4</h2><img src="img/cama.png" alt="Cama 4"></div>
+            <div class="cam"><h2>5</h2><img src="img/cama.png" alt="Cama 5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alas">
+        <h1>Ala 3</h1>
+        <div class="habitaciones">
+          <h2>Habitación A</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>1</h2><img src="img/cama.png" alt="Cama 1"></div>
+            <div class="cam"><h2>2</h2><img src="img/cama.png" alt="Cama 2"></div>
+          </div>
+        </div>
+        <div class="habitaciones">
+          <h2>Habitación B</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>3</h2><img src="img/cama.png" alt="Cama 3"></div>
+            <div class="cam"><h2>4</h2><img src="img/cama.png" alt="Cama 3"></div>
+          </div>
+        </div>
+        <div class="habitaciones">
+          <h2>Habitación C</h2>
+          <div class="cam-container">
+            <div class="cam"><h2>5</h2><img src="img/cama.png" alt="Cama 4"></div>
+            <div class="cam"><h2>6</h2><img src="img/cama.png" alt="Cama 5"></div>
+          </div>
+        </div>
+      </div>
+  
+
+    <section class="emergencias">
+      <h1>Camas de Emergencia </h1>
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:24px;">
+        <div class="cam"><h2>E-1</h2><img src="img/cama.png" alt="Cama emergencia 1"></div>
+        <div class="cam"><h2>E-2</h2><img src="img/cama.png" alt="Cama emergencia 2"></div>
+        <div class="cam"><h2>E-3</h2><img src="img/cama.png" alt="Cama emergencia 3"></div>
+      </div>
+    </section>
+  </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  let camaSeleccionadaId = null;
+
+  // Cargar pacientes al <select>
+  function cargarPacientes() {
+    fetch('/pacientes-disponibles')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error al obtener pacientes');
+        }
+        return response.json();
+      })
+      .then(pacientes => {
+        const select = $('#selectPaciente');
+        select.empty().append('<option value="">Seleccione un paciente</option>');
+        pacientes.forEach(p => {
+          select.append(`<option value="${p.id}">${p.nombre}</option>`);
+        });
+      })
+      .catch(error => {
+        console.error('Error al cargar pacientes:', error);
+        alert('No se pudo cargar la lista de pacientes.');
+      });
+  }
+
+  $(document).ready(function () {
+    // Mostrar/ocultar asignación al principio
+    $('.asignar-paciente').hide();
+
+    // Clic sobre una cama
+    $('.cam').on('click', function () {
+      $('.cam').removeClass('seleccionada'); // quitar selección anterior
+      $(this).addClass('seleccionada');
+      
+      camaSeleccionadaId = $(this).data('id');
+      if (!camaSeleccionadaId) {
+        alert('Esta cama no tiene ID asignado (data-id).');
+        return;
+      }
+
+      cargarPacientes(); // Cargar pacientes disponibles
+      $('.asignar-paciente').show();
+    });
+
+    // Clic en el botón Asignar
+    $('#btnAsignarPaciente').on('click', function () {
+      const pacienteId = $('#selectPaciente').val();
+      if (!camaSeleccionadaId || !pacienteId) {
+        alert('Seleccione una cama y un paciente');
+        return;
+      }
+
+      fetch('/asignar-paciente', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          camaId: camaSeleccionadaId,
+          pacienteId: pacienteId
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Paciente asignado con éxito');
+          location.reload(); // Recargar para actualizar estados
+        } else {
+          throw new Error('Error al asignar paciente');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        alert('Hubo un problema al asignar el paciente.');
+      });
+    });
+  });
+</script>
+
+
+</body>
+</html>

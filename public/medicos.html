@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Médicos</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f8ff;
+      padding: 40px;
+    }
+
+    .titulo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .boton-agregar {
+      padding: 10px 20px;
+      background-color: #2a8df2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #buscador {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #e6f0ff;
+    }
+
+    .acciones button {
+      margin-right: 5px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .editar {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .borrar {
+      background-color: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="titulo">
+    <h2>Lista de Médicos</h2>
+    <button class="boton-agregar" onclick="window.location.href='agregar_medico.html'">+ Agregar Médico</button>
+  </div>
+
+  <input type="text" id="buscador" placeholder="Buscar por nombre, correo o DNI..." oninput="filtrarMedicos()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre y Apellido</th>
+        <th>Correo</th>
+        <th>Sexo</th>
+        <th>Matrícula</th>
+        <th>DNI</th>
+        <th>Especialidad</th>
+        <th>Acciones</th>
+        
+      </tr>
+    </thead>
+    <tbody id="tabla-medicos">
+      <!-- Médicos se insertan aquí -->
+    </tbody>
+  </table>
+  
+<script>
+  let medicosOriginales = [];
+
+  // Cargar médicos al iniciar
+  fetch("/medicos")
+    .then(res => res.json())
+    .then(medicos => {
+      medicosOriginales = medicos;
+      mostrarMedicos(medicos);
+    });
+
+  // Mostrar médicos en la tabla
+  function mostrarMedicos(medicos) {
+    const tbody = document.getElementById("tabla-medicos");
+    tbody.innerHTML = ""; // Limpiar tabla
+
+    medicos.forEach(medico => {
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${medico.nombre}</td>
+        <td>${medico.correo}</td>
+        <td>${medico.sexo}</td>
+        <td>${medico.matricula}</td>
+        <td>${medico.dni}</td>
+        <td>${medico.especialidad}</td>
+        <td class="acciones">
+          <button class="editar" onclick="editar('${medico.dni}')">Editar</button>
+          <button class="borrar" onclick="eliminar(${medico.dni})">Eliminar</button>
+        </td>
+      `;
+      tbody.appendChild(fila);
+    });
+  }
+
+  // Filtrar médicos por nombre, dni, correo, matrícula, sexo, especialidad
+  function filtrarMedicos() {
+    const texto = document.getElementById("buscador").value.toLowerCase();
+
+    const filtrados = medicosOriginales.filter(medico =>
+      medico.nombre.toLowerCase().includes(texto) ||
+      medico.dni.toString().includes(texto) ||
+      medico.correo.toLowerCase().includes(texto) ||
+      medico.matricula.toLowerCase().includes(texto) ||
+      medico.sexo.toLowerCase().includes(texto) ||
+      medico.especialidad.toLowerCase().includes(texto)
+    );
+
+    mostrarMedicos(filtrados);
+  }
+</script>
+
+</body>
+</html>

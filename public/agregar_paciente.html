@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agregar Paciente</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom, #7dbcff, rgba(255,255,255,0.8)), 
+              url('img/hospital2.jpg'), 
+              url('img/hospital .jpg'), 
+              url('img/hospital3.jpg');
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: cover, 33.33% 100%, 33.33% 100%, 33.33% 100%;
+  background-position: center, left, center, right;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 0;
+}
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 30px;
+    font-size: 16px;
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+  }
+
+  .toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+  }
+  </style>
+</head>
+<body>
+    <div class="contenedor">
+      <img src="img/logo.png" alt="Logo" class="logo-flotante"><br><br>
+      <div class="formulario-box">
+        <h2>Registro de Paciente</h2><br>
+  
+  
+  
+
+                <form>
+                    <label for="derivado">
+                      <input type="checkbox" id="derivado" name="deri" onchange="toggleGuardia()"> Derivado por Guardia
+                    </label>
+            
+                    <div class="flex-row">
+                      <div class="input-group" style="flex: 1;">
+                        <label for="dni">DNI</label>
+                        <input type="text" id="dni" name="dni" placeholder="Ej: 30123456" required>
+                        <div id="errorDni" class="error-message"></div>
+                      </div>
+                      <div class="buscar-btn">
+                        <button type="button" class="boton" onclick="buscarPaciente()">Buscar</button>
+                      </div>
+                      <div id="toast" class="toast"></div>
+                    </div>
+
+
+                    
+          <div class="form-columns">
+            <div class="columna">
+
+              <div class="input-group">
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre_completo" name="nombre_completo" placeholder="Ej: Juan Pérez" required>
+                <div id="errorNombre" class="error-message"></div><br>
+              </div>
+
+              <div class="input-group">
+                <label for="telefono">Telefono</label>
+                <input type="text" id="telefono" name="telefono" placeholder="Ej: 11-1234-5678" required>
+                <div id="errorTelefono" class="error-message"></div><br>
+              </div>
+  
+              <div class="input-group">
+                <label for="edad">Fecha de Nacimiento</label>
+                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required>
+              </div>
+            </div>
+  
+            <div class="columna">
+              <div class="input-group">
+              <div class="input-group">
+                <label for="direccion">Dirección</label>
+                <input type="text" name="direccion" id="direccion" placeholder="Ej: Calle falsa 123" required><br>
+              </div>
+  
+              <div class="input-group">
+                <label for="contacto">Contacto de Emergencia</label>
+                <input type="text" id="contacto_emergencia" name="contacto_emergencia" placeholder="Ej: 11-1234-5678">
+                <div id="errorContacto" class="error-message"></div><br>
+              </div>
+
+                <label for="sexo">Sexo</label>
+                <select id="sexo" name="sexo" required>
+                  <option value="">Seleccionar</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                </select>
+                <div id="errorSexo" class="error-message"></div>
+              </div>
+  
+
+  
+              <div class="input-group"></div>
+              <div class="input-group"></div>
+            </div>
+          </div>
+  
+
+  
+          <div id="internacionFields" style="display: none;">
+          <hr class="separador">
+            <h3>🛏 Para pacientes derivados</h3>
+  
+            <div class="input-group">
+              <label for="motivo">Motivo de Internación</label>
+              <input type="text" name="motivo" id="motivo">
+            </div>
+  
+            <div class="input-group">
+              <label for="tipoCama">Tipo de cama</label>
+              <select name="tipoCama" id="tipoCama">
+                <option value="">Seleccionar</option>
+                <option value="comun">Común</option>
+                <option value="terapia">Terapia Intensiva</option>
+              </select>
+            </div>
+          </div>
+  
+        <button type="submit" class="boton" onclick="validarFormulario(event)">  Registrar Paciente</button>
+        <button type="button" id="limpiarBtn" class="boton" onclick="limpiarFormulario()">Limpiar</button>
+
+        </form>
+      </div>
+    </div>
+    <script>
+      function mostrarToast(mensaje) {
+        const toast = document.getElementById("toast");
+        toast.innerText = mensaje;
+        toast.className = "toast show";
+    
+        setTimeout(() => {
+          toast.className = toast.className.replace("show", "");
+        }, 3000); 
+      }
+    
+      function buscarPaciente() {
+  const dni = document.getElementById("dni").value;
+  if (dni !== "") {
+    fetch(`http://localhost:3000/verificar-dni/${dni}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.existe) {
+          document.getElementById("nombre_completo").disabled = true;
+          mostrarToast("El paciente existe. Datos cargados.");
+
+          const paciente = data.paciente;
+
+          // Rellenar y deshabilitar campos
+          document.getElementById("nombre_completo").value = paciente.nombre_completo || "";
+          document.getElementById("nombre_completo").disabled = true;
+
+          document.getElementById("fecha_nacimiento").value = paciente.fecha_nacimiento?.split("T")[0] || "";
+          document.getElementById("fecha_nacimiento").disabled = true;
+
+          document.getElementById("direccion").value = paciente.direccion || "";
+          document.getElementById("direccion").disabled = true;
+
+          document.getElementById("contacto_emergencia").value = paciente.contacto_emergencia || "";
+          document.getElementById("contacto_emergencia").disabled = true;
+
+          document.getElementById("sexo").value = paciente.sexo || "";
+          document.getElementById("sexo").disabled = true;
+
+          document.getElementById("telefono").value = paciente.telefono || "";
+          document.getElementById("telefono").disabled = true;
+
+          // Derivado y su campo relacionado
+          if (paciente.derivado) {
+            document.getElementById("derivado").checked = true;
+            toggleGuardia(); // Mostrar campos adicionales si está derivado
+            document.getElementById("derivado").disabled = true;
+            document.getElementById("motivo").disabled = true;
+            document.getElementById("tipoCama").disabled = true;
+          }
+
+          // También podrías deshabilitar el botón de "Registrar Paciente"
+          document.querySelector('button[type="submit"]').disabled = true;
+
+        } else {
+          mostrarToast("El paciente no existe.");
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        mostrarToast("Error al verificar el paciente");
+      });
+  } else {
+    mostrarToast("Por favor, ingrese un DNI");
+  }
+}
+
+function limpiarFormulario() {
+  document.querySelector("form").reset();
+
+  const campos = [
+    "dni", "nombre_completo", "fecha_nacimiento", "direccion",
+    "contacto_emergencia", "sexo", "telefono", "motivo", "tipoCama"
+  ];
+
+  campos.forEach(id => {
+    const campo = document.getElementById(id);
+    if (campo) {
+      campo.disabled = false;
+      campo.value = "";
+    }
+  });
+
+  document.getElementById("derivado").checked = false;
+  toggleGuardia(); // Oculta campos de internación si están visibles
+
+  document.querySelector('button[type="submit"]').disabled = false;
+  document.getElementById("editarBtn").style.display = "none";
+
+  // Limpiar mensajes de error si quedaron
+  document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
+}
+
+
+async function validarFormulario(event) {
+  event.preventDefault();
+
+  let valid = true;
+  document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
+
+  // Validación de campos
+  const dni = document.getElementById("dni").value.trim();
+  const nombre = document.getElementById("nombre_completo").value.trim();
+  const telefono = document.getElementById("telefono").value.trim();
+  const contacto = document.getElementById("contacto_emergencia").value.trim();
+  const sexo = document.getElementById("sexo").value.trim();
+  const fecha = document.getElementById("fecha_nacimiento").value;
+  const direccion = document.getElementById("direccion").value.trim();
+  const derivado = document.getElementById("derivado").checked;
+
+  // Expresiones regulares para validar
+  const dniRegex = /^\d{8}$/;
+  const nombreRegex = /^[a-zA-Z\s]+$/;
+  const telefonoRegex = /^[\d-]{6,}$/; // acepta números y guiones, mínimo 6 caracteres
+
+  if (!dniRegex.test(dni)) {
+    document.getElementById("errorDni").textContent = "DNI inválido (8 dígitos)";
+    valid = false;
+  }
+  if (!nombreRegex.test(nombre)) {
+    document.getElementById("errorNombre").textContent = "Nombre inválido (solo letras y espacios)";
+    valid = false;
+  }
+  if (!telefonoRegex.test(telefono)) {
+    document.getElementById("errorTelefono").textContent = "Teléfono inválido";
+    valid = false;
+  }
+  if (contacto && !telefonoRegex.test(contacto)) {
+    document.getElementById("errorContacto").textContent = "Contacto inválido";
+    valid = false;
+  }
+  if (sexo !== "M" && sexo !== "F") {
+    document.getElementById("errorSexo").textContent = "Seleccione sexo";
+    valid = false;
+  }
+  if (!fecha) {
+    alert("Por favor ingrese fecha de nacimiento");
+    valid = false;
+  }
+  if (!direccion) {
+    alert("Por favor ingrese dirección");
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  // Construir el objeto a enviar
+  const paciente = {
+    dni: dni,
+    nombre: nombre,
+    fecha: fecha,
+    direcc: direccion,
+    contacto: contacto,
+    sexo: sexo === "M" ? "masculino" : "femenino", // el backend espera 'masculino' o 'femenino'
+    derivado: derivado,
+    telefono: telefono
+  };
+
+  try {
+    const response = await fetch("http://localhost:3000/agregar-paciente", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(paciente)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      mostrarToast("Paciente guardado correctamente");
+      limpiarFormulario();
+    } else {
+      mostrarToast(data.mensaje || "Error al guardar paciente");
+    }
+  } catch (error) {
+    console.error("Error al guardar paciente:", error);
+    mostrarToast("Paciente guardado correctamente");
+  }
+}
+
+    </script>
+    
+  </body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Pacientes</title>
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        #internados-container {
+  margin: 20px auto;
+  max-width: 900px;
+  padding: 10px;
+}
+
+#internados-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+}
+
+#internados-tabla th,
+#internados-tabla td {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+#internados-tabla th {
+  background-color: #f2f2f2;
+}
+
+#internados-tabla tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#internados-tabla button {
+  padding: 6px 12px;
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#internados-tabla button:hover {
+  background-color: #c9302c;
+}
+#buscador {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+#internados-tabla tr.desaparecer {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <img src="img/logo.png" alt="Logo del Hospital" />
+        <h1>Pacientes Internados</h1>
+    </header><br><br>
+    <h2>Lista de Pacientes Internados</h2>
+    
+    <div id="internados-container">
+        <input type="text" name="buscador" id="buscador" placeholder="Buscar paciente"><br><br>
+  <table id="internados-tabla">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>DNI</th>
+        <th>Cama</th>
+        <th>Fecha de Asignación</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody id="internados-lista">
+
+    </tbody>
+  </table>
+</div>
+<script>
+  let pacientesGlobal = [];
+
+  async function cargarPacientesInternados() {
+    const res = await fetch('http://localhost:3000/pacientes-internados');
+    pacientesGlobal = await res.json();
+    renderizarPacientes(pacientesGlobal);
+  }
+
+  function renderizarPacientes(pacientes) {
+    const lista = document.getElementById('internados-lista');
+    lista.innerHTML = '';
+
+    if (pacientes.length === 0) {
+      lista.innerHTML = '<tr><td colspan="5">No hay pacientes internados actualmente.</td></tr>';
+      return;
+    }
+
+    pacientes.forEach(p => {
+      const fila = document.createElement('tr');
+      fila.id = `fila-${p.dni}`;
+      fila.innerHTML = `
+        <td>${p.nombre_completo}</td>
+        <td>${p.dni}</td>
+        <td>${p.cama_id}</td>
+        <td>${new Date(p.fecha_asignacion).toLocaleString()}</td>
+        <td><button onclick="darAlta('${p.dni}')">Dar Alta</button></td>
+      `;
+      lista.appendChild(fila);
+    });
+  }
+
+  async function darAlta(dni) {
+    const confirmacion = confirm(`¿Estás seguro de que deseas dar de alta al paciente con DNI ${dni}?`);
+    if (!confirmacion) return;
+
+    const res = await fetch('http://localhost:3000/dar-alta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paciente_id: dni })
+    });
+
+    const data = await res.json();
+    alert(data.mensaje);
+
+    // Animar eliminación
+    const fila = document.getElementById(`fila-${dni}`);
+    fila.classList.add('desaparecer');
+
+    setTimeout(() => {
+      fila.remove();
+      pacientesGlobal = pacientesGlobal.filter(p => p.dni !== dni);
+    }, 500);
+  }
+
+  // Buscador dinámico
+  document.getElementById('buscador').addEventListener('input', (e) => {
+    const termino = e.target.value.toLowerCase();
+    const filtrados = pacientesGlobal.filter(p =>
+      p.nombre_completo.toLowerCase().includes(termino) || p.dni.toLowerCase().includes(termino)
+    );
+    renderizarPacientes(filtrados);
+  });
+
+  window.onload = cargarPacientesInternados;
+</script>
+</body>
+</html>

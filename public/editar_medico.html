@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Médico</title>
+</head>
+<body>
+  <h1>Editar Médico</h1>
+  <form id="formEditarMedico">
+    <label>DNI (no editable): <input type="text" id="dni" disabled /></label><br/>
+    <label>Nombre: <input type="text" id="nombre" required /></label><br/>
+    <label>Correo: <input type="email" id="correo" required /></label><br/>
+    <label>Sexo:
+      <select id="sexo" required>
+        <option value="Masculino">Masculino</option>
+        <option value="Femenino">Femenino</option>
+      </select>
+    </label><br/>
+    <label>Matrícula: <input type="text" id="matricula" required /></label><br/>
+    <label>Especialidad: <input type="text" id="especialidad" required /></label><br/>
+    <button type="submit">Guardar cambios</button>
+    <button type="button" onclick="window.location.href='medicos.html'">Cancelar</button>
+  </form>
+
+  <script>
+    // Obtener el DNI de la URL ?dni=xxxx
+    const params = new URLSearchParams(window.location.search);
+    const dni = params.get('dni');
+
+    if (!dni) {
+      alert('No se indicó DNI del médico');
+      window.location.href = 'medicos.html';
+    }
+
+    // Cargar datos del médico
+    async function cargarMedico() {
+      try {
+        const res = await fetch(`/api/medicos/${dni}`);
+        if (!res.ok) throw new Error('Médico no encontrado');
+        const medico = await res.json();
+
+        document.getElementById('dni').value = medico.dni;
+        document.getElementById('nombre').value = medico.nombre;
+        document.getElementById('correo').value = medico.correo;
+        document.getElementById('sexo').value = medico.sexo;
+        document.getElementById('matricula').value = medico.matricula;
+        document.getElementById('especialidad').value = medico.especialidad;
+      } catch (err) {
+        alert('Error al cargar médico: ' + err.message);
+        window.location.href = 'medicos.html';
+      }
+    }
+
+    cargarMedico();
+
+    // Enviar actualización
+    document.getElementById('formEditarMedico').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const medicoActualizado = {
+        nombre: document.getElementById('nombre').value.trim(),
+        correo: document.getElementById('correo').value.trim(),
+        sexo: document.getElementById('sexo').value,
+        matricula: document.getElementById('matricula').value.trim(),
+        especialidad: document.getElementById('especialidad').value.trim(),
+      };
+
+      try {
+        const res = await fetch(`/api/medicos/${dni}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(medicoActualizado),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || 'Error al actualizar');
+        }
+
+        alert('Médico actualizado correctamente');
+        window.location.href = 'medicos.html';
+
+      } catch (err) {
+        alert('Error al actualizar: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
